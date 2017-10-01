@@ -6,6 +6,7 @@ using System.Linq;
 public class MakeTree : MonoBehaviour {
     public int time = 2;
     public double minDistance = 0.1;
+    public float growFactor = 0.1f;
     public bool autoCalculateOrientation = true;
 
     private bool invertFaces = false;
@@ -18,6 +19,7 @@ public class MakeTree : MonoBehaviour {
     class ExtrudedTrunk
     {
         public Vector3 point;
+        public Vector3 s;
         public Matrix4x4 matrix;
         public float time;
     }
@@ -31,15 +33,18 @@ public class MakeTree : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         Vector3 pos = transform.position;
+        Vector3 scale = transform.localScale;
         float now = Time.time;
 
         if (sections.Count == 0 || (sections[0].point - pos).sqrMagnitude > minDistance * minDistance)
         {
             ExtrudedTrunk section = new ExtrudedTrunk();
             section.point = pos;
+            section.s = scale;
             section.matrix = transform.localToWorldMatrix;
             section.time = now;
-            sections.Insert(0, section);
+            sections.Add(section);
+            scaleTree();
         }
 
         if (sections.Count < 2)
@@ -48,6 +53,7 @@ public class MakeTree : MonoBehaviour {
         Matrix4x4 worldToLocal = transform.worldToLocalMatrix;
         Matrix4x4[] finalSections = new Matrix4x4[sections.Count];
         Quaternion previousRotation;
+        
 
         int i;
         for (i=0; i < sections.Count; i++)
@@ -60,15 +66,6 @@ public class MakeTree : MonoBehaviour {
                     Quaternion rot = Quaternion.LookRotation(direction, Vector3.up);
                     previousRotation = rot;
                     finalSections[i] = worldToLocal * Matrix4x4.TRS(pos, rot, Vector3.one);
-                }
-                else if (i != sections.Count - 1)
-                {
-                    Vector3 direction = sections[0].point - sections[1].point;
-                    Quaternion rot = Quaternion.LookRotation(direction, Vector3.up);
-                    previousRotation = rot;
-                    finalSections[i] = worldToLocal * Matrix4x4.TRS(pos, rot, Vector3.one);
-                    if (Quaternion.Angle(previousRotation, rot) > 20)
-                        rot = Quaternion.Slerp(previousRotation, rot, 0.5f);  
                 }
                 else
                 {
@@ -84,9 +81,23 @@ public class MakeTree : MonoBehaviour {
                 else
                 {
                     finalSections[i] = worldToLocal * sections[i].matrix;
+                    sections[i].s += new Vector3(1, 0, 1) * now;
                 }
             }
         }
         MeshExtrusion.ExtrudeMesh(srcMesh, GetComponent<MeshFilter>().mesh, finalSections, precomputedEdges, invertFaces);
 	}
+    void scaleTree() {
+        int i;
+        int j;
+        for (i = 0; i < sections.Count; i++)
+        {
+            j = 0;
+            while (j < 200)
+            {
+                sections[i].point += new Vector3(1, 0, 1) * Time.deltaTime;
+                j++;
+            }
+        }
+    }
 }

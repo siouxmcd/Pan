@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class rigidBodyVelocity : MonoBehaviour {
-    public int speed = 10;
+    public float speed = 0.1f;
 	// Use this for initialization
 	void Start () {
-        GetComponent<Rigidbody>().velocity = transform.TransformDirection(Vector3.forward) * speed;
+        GetComponent<Rigidbody>().velocity = transform.TransformDirection(Vector3.up) * speed;
 	}
 	
 	// Update is called once per frame
