@@ -58,7 +58,7 @@ function LateUpdate () {
 				var direction = sections[0].point - sections[1].point;
 				var rotation = Quaternion.LookRotation(direction, Vector3.up);
 				previousRotation = rotation;
-				finalSections[i] = worldToLocal * Matrix4x4.TRS(position, rotation, Vector3.one);	
+				finalSections[i] = worldToLocal * Matrix4x4.TRS(position, rotation, Vector3.one);
 			}
 			// all elements get the direction by looking up the next section
 			else if (i != sections.length - 1)
